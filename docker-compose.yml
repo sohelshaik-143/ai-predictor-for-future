@@ -1,0 +1,57 @@
+version: '3.8'
+services:
+  # -------------------
+  # MySQL Database
+  # -------------------
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+
+  # -------------------
+  # Backend (Spring Boot)
+  # -------------------
+  backend:
+    build: ./backend
+    depends_on:
+      - mysql
+      - ml-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      AI_SERVICE_URL: ${ML_SERVICE_URL}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+
+  # -------------------
+  # ML Service
+  # -------------------
+  ml-service:
+    build: ./ml-service
+    environment:
+      ML_API_KEY: ${ML_API_KEY}
+    ports:
+      - "8001:8001"
+
+  # -------------------
+  # Frontend (React / Next)
+  # -------------------
+  frontend:
+    build: ./frontend
+    ports:
+      - "8081:80"
+
+volumes:
+  mysql-data:
