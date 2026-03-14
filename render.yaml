@@ -1,0 +1,68 @@
+## ═══════════════════════════════════════════════════════════
+##  Render Blueprint — APS AI Predictor for Future
+##  Repo: https://github.com/sohelshaik-143/ai-predictor-for-future
+##
+##  Services:
+##    1. backend  — Spring Boot API  (Web Service · Docker)
+##    2. frontend — React SPA        (Static Site)
+##
+##  BEFORE DEPLOYING set these environment variables in Render:
+##    SPRING_DATA_MONGODB_URI  → your MongoDB Atlas connection string
+##    JWT_SECRET               → any 64-char random hex string
+##    GOOGLE_CLIENT_ID         → (optional) Google OAuth
+##    GOOGLE_CLIENT_SECRET     → (optional) Google OAuth
+## ═══════════════════════════════════════════════════════════
+
+services:
+
+  # ──────────────────────────────────────
+  # 1. SPRING BOOT BACKEND
+  # ──────────────────────────────────────
+  - type: web
+    name: ai-predictor-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    region: singapore           # closest to India
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8084
+      - key: SPRING_DATA_MONGODB_URI
+        sync: false             # ← you must paste your Atlas URI in Render dashboard
+      - key: JWT_SECRET
+        sync: false             # ← paste a 64-char random hex
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CLIENT_ID
+        value: not-configured
+      - key: GITHUB_CLIENT_SECRET
+        value: not-configured
+      - key: LINKEDIN_CLIENT_ID
+        value: not-configured
+      - key: LINKEDIN_CLIENT_SECRET
+        value: not-configured
+
+  # ──────────────────────────────────────
+  # 2. REACT FRONTEND (Static Site)
+  # ──────────────────────────────────────
+  - type: web
+    name: ai-predictor-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/build
+    plan: free
+    region: singapore
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html   # React Router SPA fallback
+    envVars:
+      - key: REACT_APP_API_BASE
+        fromService:
+          name: ai-predictor-backend
+          type: web
+          property: host           # auto-fills backend URL
