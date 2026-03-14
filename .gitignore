@@ -1,6 +1,7 @@
 # ── Node / Frontend ───────────────────────
 frontend/node_modules/
 frontend/build/
+frontend/.cache/
 frontend/.env.local
 frontend/.env.development.local
 frontend/.env.test.local
