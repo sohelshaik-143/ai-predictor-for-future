@@ -18,5 +18,5 @@ EXPOSE 8001
 
 ENV PORT=8001
 
-# Command to run the FastAPI app via uvicorn (Railway injects $PORT)
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
+# Use shell form with /bin/sh so $PORT is expanded at runtime
+CMD ["/bin/sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
