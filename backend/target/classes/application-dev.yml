@@ -30,19 +30,19 @@ spring:
       client:
         registration:
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID:not-configured}
+            client-secret: ${GOOGLE_CLIENT_SECRET:not-configured}
             scope: email, profile
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
 
           github:
-            client-id: ${GITHUB_CLIENT_ID}
-            client-secret: ${GITHUB_CLIENT_SECRET}
+            client-id: ${GITHUB_CLIENT_ID:not-configured}
+            client-secret: ${GITHUB_CLIENT_SECRET:not-configured}
             scope: user:email
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
 
           linkedin:
-            client-id: ${LINKEDIN_CLIENT_ID}
-            client-secret: ${LINKEDIN_CLIENT_SECRET}
+            client-id: ${LINKEDIN_CLIENT_ID:not-configured}
+            client-secret: ${LINKEDIN_CLIENT_SECRET:not-configured}
             scope: r_liteprofile, r_emailaddress
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
