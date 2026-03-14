@@ -107,6 +107,41 @@ public class IncomeController {
     }
 
     // ===============================
+    // GET ALL INCOME RECORDS
+    // ===============================
+    @GetMapping
+    public ResponseEntity<?> getAllIncome(
+            @AuthenticationPrincipal UserDetails userDetails) {
+
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Unauthenticated"));
+        }
+
+        try {
+            User user = userService.getUserByEmail(
+                    userDetails.getUsername());
+
+            List<IncomeLog> incomeList =
+                    incomeService.getAllIncomeForUser(user.getId());
+
+            return ResponseEntity.ok(Map.of(
+                    "timestamp", Instant.now(),
+                    "count", incomeList.size(),
+                    "data", incomeList
+            ));
+
+        } catch (RuntimeException ex) {
+
+            return ResponseEntity.badRequest().body(Map.of(
+                    "timestamp", Instant.now(),
+                    "status", 400,
+                    "error", ex.getMessage()
+            ));
+        }
+    }
+
+    // ===============================
     // SUMMARY
     // ===============================
     @GetMapping("/summary")
@@ -144,12 +179,11 @@ public class IncomeController {
     }
 
     // ===============================
-    // PREDICT (Stub for AI)
+    // PREDICT (Stub for AI) - Changed to GET
     // ===============================
-    @PostMapping("/predict")
+    @GetMapping("/predict")
     public ResponseEntity<?> predict(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody Map<String, Object> body) {
+            @AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)

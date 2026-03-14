@@ -57,4 +57,11 @@ public class IncomeService {
     public List<IncomeLog> recentForUser(String userId) {
         return incomeLogRepository.findByUserIdOrderByDateDesc(userId);
     }
+
+    // ===============================
+    // GET ALL INCOME FOR USER
+    // ===============================
+    public List<IncomeLog> getAllIncomeForUser(String userId) {
+        return incomeLogRepository.findByUserIdOrderByDateDesc(userId);
+    }
 }

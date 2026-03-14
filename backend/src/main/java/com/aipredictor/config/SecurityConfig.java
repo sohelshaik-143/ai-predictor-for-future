@@ -106,7 +106,7 @@ public class SecurityConfig {
 
             // Redirect to React with token
             response.sendRedirect(
-                    "http://localhost:3000/oauth-success?token=" + jwtToken
+                    "http://localhost:3001/oauth-success?token=" + jwtToken
             );
         };
     }
@@ -152,7 +152,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:3001"
+                "http://localhost:3001",
+                "http://localhost:8084"
         ));
 
         configuration.setAllowedMethods(List.of(

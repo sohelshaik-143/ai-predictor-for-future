@@ -5,7 +5,10 @@ import axios from "axios";
 ========================= */
 
 const API_BASE =
-  process.env.REACT_APP_API_BASE || "http://localhost:8080/api";
+  process.env.REACT_APP_API_BASE || "http://localhost:8084/api";
+
+// Docker-compose uses 'backend' as hostname when running in containers
+const DOCKER_API_BASE = "http://backend:8084/api";
 
 /* =========================
    TOKEN HELPERS
@@ -56,14 +59,20 @@ api.interceptors.response.use(
       return Promise.reject("Network error. Check your connection.");
     }
 
-    // Unauthorized (401) → React-controlled logout
+    // Unauthorized (401) — only logout if user was already authenticated
+    // (don't fire auth-logout on a failed login attempt)
     if (error.response.status === 401) {
+      const wasLoggedIn = !!getToken();
       clearToken();
-
-      // Notify app about logout
-      window.dispatchEvent(new Event("auth-logout"));
-
-      return Promise.reject("Session expired. Please login again.");
+      if (wasLoggedIn) {
+        window.dispatchEvent(new Event("auth-logout"));
+        return Promise.reject("Session expired. Please login again.");
+      }
+      return Promise.reject(
+        error.response.data?.message ||
+        error.response.data?.error ||
+        "Invalid credentials. Please check your email and password."
+      );
     }
 
     return Promise.reject(
@@ -105,7 +114,14 @@ export const logoutUser = () => {
    INCOME APIs
 ========================= */
 
-export const getIncome = () => api.get("/income");
+export const getIncome = async () => {
+  const response = await api.get("/income");
+  // axios interceptor already returns response.data (the body)
+  // Backend body: { timestamp, count, data: [...] } OR direct array
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response.data)) return response.data;
+  return [];
+};
 
 export const addIncome = (amount, source = "manual") =>
   api.post("/income", {
@@ -121,7 +137,12 @@ export const deleteIncome = (id) =>
    PREDICTION APIs
 ========================= */
 
-export const getPrediction = () => api.get("/predict");
+export const getPrediction = async () => {
+  const response = await api.get("/income/predict");
+  if (Array.isArray(response)) return response;
+  if (response && Array.isArray(response.predicted_next_7d)) return response.predicted_next_7d;
+  return [];
+};
 
 /* =========================
    AI FEATURES

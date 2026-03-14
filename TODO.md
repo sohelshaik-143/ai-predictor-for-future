@@ -1,41 +1,51 @@
-# TODO: Fix Frontend and Backend Errors
+# TODO: Fix Configuration Errors
 
-## Issues Identified:
+## Current Issues Identified:
+1. Database mismatch - docker-compose uses MySQL, but application uses MongoDB
+2. Port mismatches between docker-compose and application configurations
 
-### 1. Port Mismatches
-- Frontend API base URL: `http://localhost:8084` (api.js) but backend runs on `8080`
-- OAuth2 redirect in SecurityConfig points to `http://localhost:3000` but frontend typically runs on 3000
+## Fixes Applied:
 
-### 2. Database Configuration Mismatch
-- application.yml uses MongoDB (`spring.data.mongodb.uri`)
-- docker-compose.yml uses MySQL
+### 1. ✅ Update docker-compose.yml to use MongoDB
+- Changed MySQL service to MongoDB (mongo:6.0)
+- Updated backend to use MongoDB connection string
+- Aligned backend port to 8084
+- Updated frontend port mapping to 3000:80
 
-### 3. CORS Configuration
-- Backend CORS allows only `http://localhost:3000`
-- Need to ensure consistency
+### 2. ✅ Updated Application Configuration
+- Backend application.yml now uses environment variables with fallbacks
+- MongoDB URI configurable via SPRING_DATA_MONGODB_URI
+- Server port configurable via SERVER_PORT
 
-### 4. OAuth2 Login Endpoint
-- Frontend calls `http://localhost:8084/oauth2/authorize/google` but backend is on port 8080
+### 3. ✅ Frontend Configuration
+- Frontend API configured to connect to backend on port 8084
+- Added Docker API base URL constant for container networking
 
-## Fix Plan:
+## Completed
+All configuration errors have been fixed. The application now has consistent MongoDB and port configuration across all files.
 
-### Step 1: Fix Frontend API Base URL
-- Update `frontend/src/api/api.js` to use port 8080
+## Running the Application
 
-### Step 2: Fix CORS Configuration in Backend
-- Update `SecurityConfig.java` to allow frontend port
+### Local Development:
+```bash
+# Start MongoDB
+docker run -d -p 27017:27017 --name mongodb mongo:6.0
 
-### Step 3: Fix OAuth2 Redirect URI
-- Update `SecurityConfig.java` to redirect to correct frontend URL
+# Start Backend (port 8084)
+cd backend && mvn spring-boot:run
 
-### Step 4: Fix Frontend OAuth2 Login URL
-- Update `Login.jsx` to use correct backend port
+# Start Frontend (port 3000)
+cd frontend && npm start
+```
 
-### Step 5: Choose and Configure Database
-- Option A: Use MongoDB (current config in application.yml)
-- Option B: Switch to MySQL (docker-compose.yml)
+### Docker Compose:
+```bash
+docker-compose up --build
+```
 
-For simplicity, we'll use MongoDB as it's already configured.
-
-### Step 6: Run Both Frontend and Backend
+### Service URLs:
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8084
+- MongoDB: localhost:27017
+- ML Service: http://localhost:8001
 

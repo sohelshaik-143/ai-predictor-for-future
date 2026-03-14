@@ -1,241 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AIPredictor - Farmer Theme Dashboard</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>APS AI Financial Dashboard</title>
 
-<!-- Tailwind CSS -->
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind CSS CDN — preflight disabled, defer so ad-blockers can't crash the page -->
+  <script>window.tailwind = window.tailwind || {}; tailwind.config = { corePlugins: { preflight: false } }</script>
+  <script src="https://cdn.tailwindcss.com" defer></script>
 
-<!-- React + ReactDOM -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script crossorigin src="https://unpkg.com/react-router-dom@6/umd/react-router-dom.development.js"></script>
+  <!-- Font Awesome icons -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous"
+  />
 
-<!-- Babel -->
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Custom animations not in Tailwind CDN by default */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.7s ease-out forwards;
+    }
 
-<!-- Font Awesome -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Canvas Confetti -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
-<style>
-body {
-  margin:0; font-family:'Poppins',sans-serif;
-  background: linear-gradient(-45deg,#87ceeb,#f57a8f,#4caf50);
-  background-size:400% 400%; animation: gradientBG 20s ease infinite;
-}
-@keyframes gradientBG {0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.animate-fadeInUp { animation: fadeInUp 0.8s ease-out; }
-@keyframes fadeInUp {0%{opacity:0; transform:translateY(30px);}100%{opacity:1; transform:translateY(0);}}
-.typing { overflow:hidden; border-right:.15em solid white; white-space:nowrap; animation: typing 2s steps(30,end), blink-caret .5s step-end infinite; }
-@keyframes typing { from { width:0 } to { width:100% } }
-@keyframes blink-caret { 50% { border-color: transparent; } }
-.button-hover:hover { transform: scale(1.05); transition: all 0.3s ease; }
-.social-icon:hover { transform: scale(1.2); transition: all 0.3s ease; }
-.glass-card { background: rgba(245,222,170,0.2); backdrop-filter: blur(15px); box-shadow: 0 8px 32px rgba(0,0,0,0.25); border-radius: 2rem; }
-.dashboard-card { background: rgba(76,175,80,0.4); backdrop-filter: blur(10px); border-radius:1rem; padding:1.5rem; color:white; text-align:center; box-shadow: 0 4px 20px rgba(0,0,0,0.3); transition: transform 0.3s ease, box-shadow 0.3s ease; }
-.dashboard-card:hover { transform: scale(1.05); box-shadow: 0 8px 40px rgba(255,255,255,0.3); }
-#particles { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:0; }
-.language-selector { position:absolute; top:20px; right:20px; z-index:20; }
-</style>
+    @keyframes gradientBG {
+      0%   { background-position: 0%   50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0%   50%; }
+    }
+  </style>
 </head>
-<body class="relative">
-
-<canvas id="particles"></canvas>
-<div class="language-selector">
-  <select id="languageSelect" class="p-2 rounded-lg bg-white text-black"></select>
-</div>
-<div id="root" class="w-full h-screen flex items-center justify-center relative z-10"></div>
-
-<script type="text/babel">
-const { useState, useEffect, useRef } = React;
-
-// Leaf/pollen particle background
-function Particles() {
-  useEffect(()=>{
-    const canvas=document.getElementById("particles");
-    const ctx=canvas.getContext("2d");
-    canvas.width=window.innerWidth; canvas.height=window.innerHeight;
-    const particles=[];
-    for(let i=0;i<100;i++){
-      particles.push({
-        x:Math.random()*canvas.width,
-        y:Math.random()*canvas.height,
-        r:Math.random()*4+1,
-        s:Math.random()*1+0.2,
-        color: ['#a0522d','#deb887','#ffffe0','#7cfc00'][Math.floor(Math.random()*4)]
-      });
-    }
-    function animate(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      particles.forEach(p=>{
-        p.y-=p.s; if(p.y<0) p.y=canvas.height;
-        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
-        ctx.fillStyle=p.color;
-        ctx.fill();
-      });
-      requestAnimationFrame(animate);
-    }
-    animate();
-    window.addEventListener("resize",()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight});
-  },[]);
-  return null;
-}
-
-// Translations
-const translations = {
-  en: {welcome:"Welcome Back!", create:"Create Account", login:"Login", register:"Register", name:"Full Name", email:"Email", password:"Password", dontHave:"Don't have an account?", alreadyHave:"Already have an account?", logout:"Logout", users:"Users", predictions:"Predictions", accuracy:"Accuracy", dashboard:"Dashboard"},
-  hi: {welcome:"वापसी पर स्वागत है!", create:"खाता बनाएँ", login:"लॉगिन", register:"रजिस्टर", name:"पूरा नाम", email:"ईमेल", password:"पासवर्ड", dontHave:"खाता नहीं है?", alreadyHave:"खाता पहले से है?", logout:"लॉगआउट", users:"उपयोगकर्ता", predictions:"पूर्वानुमान", accuracy:"सटीकता", dashboard:"डैशबोर्ड"},
-  te: {welcome:"మళ్లీ స్వాగతం!", create:"ఖాతాను సృష్టించండి", login:"లాగిన్", register:"రెజిస్టర్", name:"పూర్తి పేరు", email:"ఇమెయిల్", password:"పాస్వర్డ్", dontHave:"ఖాతా లేదు?", alreadyHave:"ఇప్పుడే ఖాతా ఉందా?", logout:"లాగ్ అవుట్", users:"వినియోగదారులు", predictions:"భవిష్యవాణీలు", accuracy:"ఖచ్చితత్వం", dashboard:"డాష్‌బోర్డ్"}
-};
-
-const App = () => {
-  const [view,setView]=useState("login");
-  const [token,setToken]=useState(localStorage.getItem("aip_token")||"");
-  const [lang,setLang]=useState("en");
-
-  useEffect(()=>{
-    const langSelect = document.getElementById("languageSelect");
-    langSelect.innerHTML = Object.keys(translations).map(k=>`<option value="${k}">${k.toUpperCase()}</option>`).join('');
-    langSelect.value=lang;
-    langSelect.onchange = ()=>setLang(langSelect.value);
-  },[]);
-
-  // Voice control
-  useEffect(()=>{
-    if(!window.webkitSpeechRecognition) return;
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.continuous=true; recognition.lang="en-US";
-    recognition.onresult=(event)=>{
-      const text = event.results[event.results.length-1][0].transcript.toLowerCase();
-      if(text.includes("login")) setView("login");
-      if(text.includes("register")) setView("register");
-      if(text.includes("logout")) handleLogout();
-    };
-    recognition.start();
-    return ()=>recognition.stop();
-  },[]);
-
-  const handleLogin=(email,password)=>{
-    if(email && password){
-      localStorage.setItem("aip_token","demo-token"); 
-      setToken("demo-token"); setView("dashboard");
-      confetti({particleCount:100, spread:70, origin:{y:0.6}});
-    } else alert("Enter email/password");
-  };
-  const handleRegister=(name,email,password)=>{
-    if(name && email && password){
-      alert("Registered successfully"); setView("login");
-      confetti({particleCount:150, spread:80, origin:{y:0.6}});
-    } else alert("Fill all fields");
-  };
-  const handleLogout=()=>{ localStorage.removeItem("aip_token"); setToken(""); };
-
-  return(
-    <>
-      <Particles/>
-      <div className="w-full h-screen flex items-center justify-center animate-fadeInUp z-10 relative">
-        {!token && (view==="login" || view==="register") && (
-          <div className="glass-card p-10 w-96 text-center animate-fadeInUp z-10">
-            {view==="login" ? <LoginForm t={translations[lang]} onLogin={handleLogin} switchToRegister={()=>setView("register")}/> :
-             <RegisterForm t={translations[lang]} onRegister={handleRegister} switchToLogin={()=>setView("login")}/>}
-          </div>
-        )}
-        {token && <Dashboard t={translations[lang]} onLogout={handleLogout}/>}
-      </div>
-    </>
-  );
-};
-
-// Login Form
-const LoginForm = ({t,onLogin,switchToRegister})=>{
-  const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
-  return(
-    <>
-      <h2 className="text-4xl font-bold mb-6 text-yellow-300 typing">{t.welcome}</h2>
-      <input type="email" placeholder={t.email} className="w-full p-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400" value={email} onChange={e=>setEmail(e.target.value)}/>
-      <input type="password" placeholder={t.password} className="w-full p-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-yellow-400" value={password} onChange={e=>setPassword(e.target.value)}/>
-      <button onClick={()=>onLogin(email,password)} className="w-full bg-gradient-to-r from-green-500 to-yellow-400 text-white py-3 rounded-xl hover:from-yellow-400 hover:to-green-500 button-hover mb-4">{t.login}</button>
-      <div className="flex justify-center gap-4 mb-4">
-        <button className="bg-red-500 text-white py-2 px-4 rounded-full social-icon"><i className="fab fa-google"></i></button>
-        <button className="bg-blue-600 text-white py-2 px-4 rounded-full social-icon"><i className="fab fa-facebook-f"></i></button>
-      </div>
-      <p className="mt-4 text-gray-800">{t.dontHave} <span className="text-yellow-300 cursor-pointer" onClick={switchToRegister}>{t.register}</span></p>
-    </>
-  );
-};
-
-// Register Form
-const RegisterForm = ({t,onRegister,switchToLogin})=>{
-  const [name,setName]=useState(""); const [email,setEmail]=useState(""); const [password,setPassword]=useState("");
-  return(
-    <>
-      <h2 className="text-4xl font-bold mb-6 text-green-300 typing">{t.create}</h2>
-      <input type="text" placeholder={t.name} className="w-full p-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" value={name} onChange={e=>setName(e.target.value)}/>
-      <input type="email" placeholder={t.email} className="w-full p-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" value={email} onChange={e=>setEmail(e.target.value)}/>
-      <input type="password" placeholder={t.password} className="w-full p-3 mb-4 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-400" value={password} onChange={e=>setPassword(e.target.value)}/>
-      <button onClick={()=>onRegister(name,email,password)} className="w-full bg-gradient-to-r from-orange-500 to-brown-600 text-white py-3 rounded-xl hover:from-brown-600 hover:to-orange-500 button-hover mb-4">{t.register}</button>
-      <p className="mt-4 text-gray-800">{t.alreadyHave} <span className="text-green-300 cursor-pointer" onClick={switchToLogin}>{t.login}</span></p>
-    </>
-  );
-};
-
-// Dashboard
-const Dashboard = ({t,onLogout})=>{
-  const widgets = [
-    {title:t.users, value:256},
-    {title:t.predictions, value:128},
-    {title:t.accuracy, value:"97%"}
-  ];
-  const chartRef=useRef(null);
-  const [counts,setCounts]=useState([0,0,0]);
-
-  useEffect(()=>{
-    const interval = setInterval(()=>{
-      setCounts(prev => prev.map((c,i)=>c<widgets[i].value?c+Math.ceil(widgets[i].value/50):c));
-    },50);
-    return ()=>clearInterval(interval);
-  },[]);
-
-  useEffect(()=>{
-    const ctx=chartRef.current.getContext("2d");
-    new Chart(ctx,{
-      type:'line',
-      data:{
-        labels:["Jan","Feb","Mar","Apr","May","Jun"],
-        datasets:[{label:t.predictions, data:[12,19,3,5,2,10], borderColor:'rgba(255,255,255,0.9)', backgroundColor:'rgba(255,255,255,0.2)', tension:0.4}]
-      },
-      options:{plugins:{legend:{labels:{color:'white'}}},scales:{y:{ticks:{color:'white'}},x:{ticks:{color:'white'}}}}
-    });
-  },[t]);
-
-  return(
-    <div className="h-screen w-full flex flex-col items-center justify-center gap-6 px-6">
-      <h1 className="text-5xl font-bold text-white mb-8 typing">{t.dashboard}</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-        {widgets.map((w,i)=>(
-          <div key={i} className="dashboard-card">
-            <h2 className="text-xl font-semibold">{w.title}</h2>
-            <p className="text-3xl font-bold">{counts[i]}</p>
-          </div>
-        ))}
-      </div>
-      <div className="w-full md:w-1/2 mt-8">
-        <canvas ref={chartRef}></canvas>
-      </div>
-      <button onClick={onLogout} className="mt-8 bg-gradient-to-r from-green-500 to-yellow-400 text-white py-3 px-6 rounded-xl hover:from-yellow-400 hover:to-green-500 button-hover">{t.logout}</button>
-    </div>
-  );
-};
-
-ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-</script>
+<body>
+  <div id="root"></div>
 </body>
 </html>

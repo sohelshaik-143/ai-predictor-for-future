@@ -1,20 +1,17 @@
 version: '3.8'
 services:
   # -------------------
-  # MySQL Database
+  # MongoDB Database
   # -------------------
-  mysql:
-    image: mysql:8.0
+  mongodb:
+    image: mongo:6.0
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MONGO_INITDB_DATABASE: aipredictor
     volumes:
-      - mysql-data:/var/lib/mysql
+      - mongodb-data:/data/db
     ports:
-      - "3306:3306"
+      - "27017:27017"
 
   # -------------------
   # Backend (Spring Boot)
@@ -22,18 +19,14 @@ services:
   backend:
     build: ./backend
     depends_on:
-      - mysql
-      - ml-service
+      - mongodb
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE}
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      AI_SERVICE_URL: ${ML_SERVICE_URL}
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      SERVER_PORT: 8080
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/aipredictor
+      SPRING_DATA_MONGODB_DATABASE: aipredictor
+      JWT_SECRET: ${JWT_SECRET:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+      ML_SERVICE_URL: ${ML_SERVICE_URL:-http://ml-service:8001}
     ports:
-      - "8080:8080"
+      - "8084:8084"
 
   # -------------------
   # ML Service
@@ -46,12 +39,12 @@ services:
       - "8001:8001"
 
   # -------------------
-  # Frontend (React / Next)
+  # Frontend (React)
   # -------------------
   frontend:
     build: ./frontend
     ports:
-      - "8081:80"
+      - "3000:80"
 
 volumes:
-  mysql-data:
+  mongodb-data:
