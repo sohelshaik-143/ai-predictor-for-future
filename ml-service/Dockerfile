@@ -18,5 +18,7 @@ EXPOSE 8001
 
 ENV PORT=8001
 
-# Python reads PORT from env directly — works on all container platforms
-CMD ["python", "-c", "import os,uvicorn; uvicorn.run('app.main:app', host='0.0.0.0', port=int(os.environ.get('PORT',8001)))"]
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
