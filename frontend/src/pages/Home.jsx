@@ -113,7 +113,7 @@ export default function Home() {
             </div>
             <div style={{ display: "flex", gap: "0.75rem" }}>
               {isLoggedIn ? (
-                <button onClick={() => navigate("/dashboard")} style={{ background: "linear-gradient(90deg,#6366f1,#4f46e5)", border: "none", borderRadius: "0.75rem", padding: "0.5rem 1.25rem", color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
+                <button onClick={() => navigate("/my-dashboard")} style={{ background: "linear-gradient(90deg,#6366f1,#4f46e5)", border: "none", borderRadius: "0.75rem", padding: "0.5rem 1.25rem", color: "#fff", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer" }}>
                   My Dashboard
                 </button>
               ) : (
