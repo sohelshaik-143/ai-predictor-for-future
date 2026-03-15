@@ -7,6 +7,7 @@ import FinancialSetup from "./pages/FinancialSetup";
 import InvestmentPlan from "./pages/InvestmentPlan";
 import Profile from "./pages/Profile";
 import WorkerHub from "./pages/WorkerHub";
+import JobBoard from "./pages/JobBoard";
 import OnboardingModal from "./components/OnboardingModal";
 
 class ErrorBoundary extends Component {
@@ -119,6 +120,7 @@ function App() {
           <Route path="/investment-plan" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><InvestmentPlan /></PageBoundary></ProtectedRoute>} />
           <Route path="/profile"         element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Profile        /></PageBoundary></ProtectedRoute>} />
           <Route path="/worker"          element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><WorkerHub      /></PageBoundary></ProtectedRoute>} />
+          <Route path="/jobs"            element={<PageBoundary><JobBoard /></PageBoundary>} />
           <Route path="/"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
           <Route path="*"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
         </Routes>
