@@ -359,8 +359,8 @@ export default function JobBoard() {
         {/* ── NAVBAR ─────────────────────────────────────────────────────────── */}
         <nav style={{ background:"rgba(0,0,0,0.5)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(255,255,255,0.06)", padding:"0 1.5rem", position:"sticky", top:0, zIndex:100 }}>
           <div style={{ maxWidth:1200, margin:"0 auto", height:64, display:"flex", alignItems:"center", gap:"1rem" }}>
-            <button onClick={() => navigate("/dashboard")} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:"0.5rem", color:"rgba(255,255,255,0.5)", fontSize:"0.85rem", padding:"0.3rem 0" }}>
-              ← AI Dashboard
+            <button onClick={() => navigate("/")} style={{ background:"none", border:"none", cursor:"pointer", display:"flex", alignItems:"center", gap:"0.5rem", color:"rgba(255,255,255,0.5)", fontSize:"0.85rem", padding:"0.3rem 0" }}>
+              ← Home
             </button>
             <div style={{ display:"flex", alignItems:"center", gap:"0.5rem" }}>
               <span style={{ fontSize:"1.4rem" }}>💼</span>

@@ -515,6 +515,11 @@ export default function Dashboard() {
         {/* ── HEADER ── */}
         <div className="flex flex-wrap justify-between items-center gap-4 mb-5">
           <div>
+            <button onClick={() => navigate("/")}
+              className="mb-2 px-3 py-1.5 rounded-xl text-sm font-semibold hover:scale-105 transition-all"
+              style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", color: "rgba(255,255,255,0.55)", cursor: "pointer" }}>
+              ← Home
+            </button>
             <div className="flex items-center gap-3 flex-wrap">
               <h1 className="text-4xl font-extrabold tracking-tight animate-gradientText" style={{ margin: 0 }}>
                 APS AI {lang === "en" ? "Dashboard" : t("dashboardTitle").replace("APS AI ", "")}

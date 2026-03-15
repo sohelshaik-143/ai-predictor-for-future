@@ -499,7 +499,7 @@ export default function WorkerHub() {
       <div style={{ position: "relative", zIndex: 1, padding: "1.5rem", maxWidth: 1100, margin: "0 auto" }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem", flexWrap: "wrap" }}>
-          <button onClick={() => navigate("/dashboard")} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "0.75rem", padding: "0.5rem 1rem", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontWeight: 600 }}>← Dashboard</button>
+          <button onClick={() => navigate("/")} style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "0.75rem", padding: "0.5rem 1rem", color: "rgba(255,255,255,0.6)", cursor: "pointer", fontWeight: 600 }}>← Home</button>
           <div>
             <h1 style={{ fontSize: "1.8rem", fontWeight: 900, margin: 0, background: "linear-gradient(90deg,#fbbf24,#f59e0b,#10b981)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               👷 Worker Hub
