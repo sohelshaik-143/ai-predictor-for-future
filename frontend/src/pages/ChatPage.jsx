@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { logVisit, addTime } from "../utils/tracker";
 
 // ─── Pre-trained knowledge base ──────────────────────────────────────────────
 const KB = [
@@ -162,6 +163,11 @@ export default function ChatPage() {
   const [thinking, setThinking] = useState(false);
   const bottomRef = useRef(null);
 
+  useEffect(() => {
+    logVisit("AI Chat");
+    const ti = setInterval(() => addTime(1), 1000);
+    return () => clearInterval(ti);
+  }, []);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const send = (text = input.trim()) => {

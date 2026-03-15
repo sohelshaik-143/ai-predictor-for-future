@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getIncome, addIncome, logoutUser, getPrediction } from "../api/api";
+import { logVisit, pushLog, addTime, getStats, fmtTime } from "../utils/tracker";
 import T, { LANGUAGES } from "../i18n/translations";
 import ChatBot from "../components/ChatBot";
 import {
@@ -159,6 +160,8 @@ export default function Dashboard() {
   const [coins,        setCoins]        = useState([]);
   const [animKey,      setAnimKey]      = useState(0);
   const [dismissWarn,  setDismissWarn]  = useState(false);
+  const [activityStats, setActivityStats] = useState(() => getStats());
+  const [sessionSecs,   setSessionSecs]   = useState(0);
   const addBtnRef = useRef(null);
 
   /* ── Live market data ─────────────────── */
@@ -197,6 +200,21 @@ export default function Dashboard() {
 
   useEffect(() => { load(); }, []);
 
+  /* ── Activity / time tracking ───────────────── */
+  useEffect(() => {
+    logVisit("AI Dashboard");
+    const interval = setInterval(() => {
+      addTime(1);
+      setSessionSecs(s => s + 1);
+    }, 1000);
+    const sync = () => setActivityStats(getStats());
+    window.addEventListener("storage", sync);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", sync);
+    };
+  }, []);
+
   /* ── Add income ───────────────────────────── */
   const handleAdd = async () => {
     const val = parseFloat(amount);
@@ -204,6 +222,8 @@ export default function Dashboard() {
     try {
       setAddLoading(true); setInputError("");
       await addIncome(val);
+      pushLog("income", `Added income ₹${Math.round(val).toLocaleString("en-IN")}`);
+      setActivityStats(getStats());
       setIncomeData((prev) => [...prev, { amount: val, date: new Date().toISOString().slice(0, 10), source: "manual" }]);
       setAmount("");
       setJustAdded(true);
@@ -816,6 +836,7 @@ export default function Dashboard() {
                 { id: "overview",  label: t("tabOverview"), icon: "📊" },
                 { id: "invest",    label: t("tabInvest"),   icon: "💹" },
                 { id: "predict",   label: t("tabPredict"),  icon: "🤖" },
+                { id: "activity",  label: "My Activity",    icon: "🕐" },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -1359,6 +1380,110 @@ export default function Dashboard() {
 
           </>
         )}
+
+        {/* ════════════════════════════════
+            TAB: MY ACTIVITY
+        ════════════════════════════════ */}
+        {activeTab === "activity" && (() => {
+          const stats = activityStats;
+          const PAGE_ICONS = { "AI Dashboard": "📊", "Worker Hub": "👷", "Job Board": "💼", "AI Chat": "🤖", "Home": "🏠" };
+          const LOG_ICONS  = { visit: "👁️", income: "💰", default: "📌" };
+          const relTime = (iso) => {
+            const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+            if (diff < 60)   return `${diff}s ago`;
+            if (diff < 3600) return `${Math.floor(diff/60)}m ago`;
+            if (diff < 86400) return `${Math.floor(diff/3600)}h ago`;
+            return new Date(iso).toLocaleDateString("en-IN", { day:"numeric", month:"short" });
+          };
+          const totalVisits = Object.values(stats.visits).reduce((a, b) => a + b, 0);
+          return (
+            <>
+              {/* ── Time cards ── */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                {[
+                  { icon: "⏱️", label: "This Session",  val: fmtTime(sessionSecs),          color: "#6366f1" },
+                  { icon: "🕐", label: "Total Time",    val: fmtTime(stats.totalTime),       color: "#10b981" },
+                  { icon: "📄", label: "Pages Visited", val: `${totalVisits} visits`,        color: "#f59e0b" },
+                  { icon: "📋", label: "Activities",    val: `${stats.log.length} logged`,   color: "#06b6d4" },
+                ].map(c => (
+                  <div key={c.label} className="p-5 rounded-2xl text-center"
+                    style={{ background: c.color + "14", border: `1px solid ${c.color}35` }}>
+                    <div style={{ fontSize: "1.8rem", marginBottom: "0.3rem" }}>{c.icon}</div>
+                    <div style={{ fontSize: "1.4rem", fontWeight: 900, color: c.color }}>{c.val}</div>
+                    <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)", marginTop: 2 }}>{c.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* ── Pages visited ── */}
+                <div className="p-6 rounded-3xl" style={{ ...glass(), borderColor: "rgba(99,102,241,0.25)" }}>
+                  <h3 className="text-white font-bold text-lg mb-4">📍 Pages Visited</h3>
+                  {Object.keys(stats.visits).length === 0 ? (
+                    <p className="text-white/30 text-sm">No visits logged yet.</p>
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {Object.entries(stats.visits).sort((a,b) => b[1]-a[1]).map(([page, count]) => (
+                        <div key={page} className="flex items-center gap-3">
+                          <span style={{ fontSize: "1.2rem" }}>{PAGE_ICONS[page] || "🔗"}</span>
+                          <div className="flex-1">
+                            <div className="flex justify-between mb-1">
+                              <span className="text-white/80 text-sm font-semibold">{page}</span>
+                              <span className="text-indigo-400 font-bold text-sm">{count}×</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full" style={{ background: "rgba(255,255,255,0.07)" }}>
+                              <div className="h-1.5 rounded-full" style={{ width: `${Math.min(100, (count / Math.max(...Object.values(stats.visits))) * 100)}%`, background: "linear-gradient(90deg,#6366f1,#4f46e5)" }} />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Income summary ── */}
+                <div className="p-6 rounded-3xl" style={{ ...glass(), borderColor: "rgba(16,185,129,0.25)" }}>
+                  <h3 className="text-white font-bold text-lg mb-4">💰 Income Summary</h3>
+                  <div className="flex flex-col gap-3">
+                    {[
+                      { label: "Total Entries",   val: incomeData.length,     color: "#6366f1" },
+                      { label: "Total Earned",    val: inr(totalIncome),      color: "#10b981" },
+                      { label: "Average/Day",     val: inr(avgDaily),         color: "#f59e0b" },
+                      { label: "Best Day",        val: inr(Math.max(0,...incomeData.map(d=>d.amount||0))), color: "#34d399" },
+                      { label: "Monthly Est.",    val: inr(monthlyEst),       color: "#a78bfa" },
+                      { label: "Yearly Est.",     val: inr(yearlyEst),        color: "#06b6d4" },
+                    ].map(r => (
+                      <div key={r.label} className="flex justify-between items-center py-1.5 border-b" style={{ borderColor: "rgba(255,255,255,0.05)" }}>
+                        <span className="text-white/50 text-sm">{r.label}</span>
+                        <span className="font-bold text-sm" style={{ color: r.color }}>{r.val}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── Activity log ── */}
+              <div className="p-6 rounded-3xl mb-6" style={{ ...glass(), borderColor: "rgba(245,158,11,0.2)" }}>
+                <h3 className="text-white font-bold text-lg mb-4">📋 Activity Log</h3>
+                {stats.log.length === 0 ? (
+                  <p className="text-white/30 text-sm">No activity yet — start using the app!</p>
+                ) : (
+                  <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-1" style={{ scrollbarWidth: "thin" }}>
+                    {stats.log.map((entry, i) => (
+                      <div key={i} className="flex items-start gap-3 p-3 rounded-xl" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.05)" }}>
+                        <span style={{ fontSize: "1.1rem", marginTop: 1 }}>{LOG_ICONS[entry.type] || LOG_ICONS.default}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white/80 text-sm font-medium truncate">{entry.detail}</p>
+                          <p className="text-white/25 text-xs mt-0.5">{relTime(entry.time)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
+          );
+        })()}
 
         {/* ── EMPTY STATE ── */}
         {!hasData && !loading && (

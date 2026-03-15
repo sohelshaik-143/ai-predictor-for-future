@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { t, LANG_OPTIONS } from "../i18n/jobLang";
 import { getToken } from "../api/api";
+import { logVisit, addTime } from "../utils/tracker";
 
 const API = process.env.REACT_APP_API_BASE || "http://localhost:8084/api";
 
@@ -312,6 +313,11 @@ export default function JobBoard() {
     } finally { setLoading(false); }
   }, [cityFilter, catFilter]);
 
+  useEffect(() => {
+    logVisit("Job Board");
+    const ti = setInterval(() => addTime(1), 1000);
+    return () => clearInterval(ti);
+  }, []);
   useEffect(() => { if (view === "find") fetchJobs(); }, [view, fetchJobs]);
 
   const fetchMyJobs = useCallback(async () => {

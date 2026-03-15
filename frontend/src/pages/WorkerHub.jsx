@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { logVisit, addTime } from "../utils/tracker";
 import {
   CITY_DATA, MIGRATION_CITIES,
   CITY_JOB_LISTINGS, PART_TIME_JOBS,
@@ -487,6 +488,12 @@ export default function WorkerHub() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("wages");
   const [lowIncome, setLowIncome] = useState(false);
+
+  useEffect(() => {
+    logVisit("Worker Hub");
+    const t = setInterval(() => addTime(1), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <div style={bg}>
