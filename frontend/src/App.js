@@ -10,7 +10,6 @@ import WorkerHub from "./pages/WorkerHub";
 import JobBoard from "./pages/JobBoard";
 import Home from "./pages/Home";
 import ChatPage from "./pages/ChatPage";
-import OnboardingModal from "./components/OnboardingModal";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -113,7 +112,6 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <OnboardingModal />
         <Routes>
           <Route path="/login"           element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Login          /></PageBoundary></PublicRoute>}    />
           <Route path="/register"        element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Register       /></PageBoundary></PublicRoute>}    />
