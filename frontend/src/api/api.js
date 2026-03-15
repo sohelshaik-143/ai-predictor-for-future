@@ -29,7 +29,7 @@ const api = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 10000,
+  timeout: 65000, // 65s — Render free tier cold start can take ~60s
 });
 
 /* =========================
@@ -54,8 +54,11 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response.data,
   (error) => {
-    // Network error
+    // Network error or timeout (Render free tier cold start)
     if (!error.response) {
+      if (error.code === "ECONNABORTED" || error.message?.includes("timeout")) {
+        return Promise.reject("Server is waking up, please wait 30 seconds and try again.");
+      }
       return Promise.reject("Network error. Check your connection.");
     }
 
