@@ -105,9 +105,10 @@ public class SecurityConfig {
             String jwtToken = jwtUtil.generateToken(username);
 
             // Redirect to React with token
-            response.sendRedirect(
-                    "http://localhost:3001/oauth-success?token=" + jwtToken
-            );
+            String frontendUrl = System.getenv("FRONTEND_URL") != null
+                    ? System.getenv("FRONTEND_URL")
+                    : "http://localhost:3000";
+            response.sendRedirect(frontendUrl + "/oauth-success?token=" + jwtToken);
         };
     }
 
@@ -150,10 +151,14 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of(
+        configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "http://localhost:3001",
-                "http://localhost:8084"
+                "http://localhost:8084",
+                "https://*.vercel.app",
+                "https://*.onrender.com",
+                "https://ai-predictor-frontend.onrender.com",
+                "https://frontend-seven-sigma-4xq7uomq89.vercel.app"
         ));
 
         configuration.setAllowedMethods(List.of(
