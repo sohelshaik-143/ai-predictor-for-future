@@ -8,6 +8,8 @@ import InvestmentPlan from "./pages/InvestmentPlan";
 import Profile from "./pages/Profile";
 import WorkerHub from "./pages/WorkerHub";
 import JobBoard from "./pages/JobBoard";
+import Home from "./pages/Home";
+import ChatPage from "./pages/ChatPage";
 import OnboardingModal from "./components/OnboardingModal";
 
 class ErrorBoundary extends Component {
@@ -121,8 +123,9 @@ function App() {
           <Route path="/profile"         element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Profile        /></PageBoundary></ProtectedRoute>} />
           <Route path="/worker"          element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><WorkerHub      /></PageBoundary></ProtectedRoute>} />
           <Route path="/jobs"            element={<PageBoundary><JobBoard /></PageBoundary>} />
-          <Route path="/"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
-          <Route path="*"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
+          <Route path="/chat"            element={<PageBoundary><ChatPage /></PageBoundary>} />
+          <Route path="/"  element={<PageBoundary><Home auth={isAuthenticated} /></PageBoundary>} />
+          <Route path="*"  element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </ErrorBoundary>
