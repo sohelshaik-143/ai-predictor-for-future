@@ -1009,6 +1009,31 @@ export default function Dashboard() {
                     ))}
                   </div>
                 </div>
+
+
+                {/* Worker Hub promo card */}
+                <div className="animate-slideUp" style={{ animationDelay: "300ms", marginTop: "1.5rem", background: "linear-gradient(135deg,rgba(245,158,11,0.12),rgba(16,185,129,0.08))", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "1.5rem", padding: "1.5rem", position: "relative", overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#f59e0b,#10b981,#6366f1)", animation: "gradientFlow 4s ease-in-out infinite" }} />
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem" }}>
+                    <div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
+                        <span style={{ fontSize: "2rem", animation: "waveFloat 3s ease-in-out infinite" }}>👷</span>
+                        <div>
+                          <div style={{ color: "#fff", fontWeight: 800, fontSize: "1.1rem" }}>Worker Hub — Find Jobs & Track Wages</div>
+                          <div style={{ color: "rgba(255,255,255,0.45)", fontSize: "0.82rem" }}>Track daily wages · Find better-paying cities · Browse 20+ jobs · Apply now</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                        {["💰 Wage Tracker","🏙️ City Jobs","🗺️ Google Maps","🎓 Part-time","📋 Apply Now"].map(t => (
+                          <span key={t} style={{ background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "999px", padding: "0.2rem 0.7rem", color: "#fbbf24", fontSize: "0.75rem", fontWeight: 600 }}>{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                    <button onClick={() => navigate("/worker")} style={{ background: "linear-gradient(90deg,#f59e0b,#d97706)", border: "none", borderRadius: "0.875rem", padding: "0.75rem 1.5rem", color: "#fff", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer", boxShadow: "0 4px 20px rgba(245,158,11,0.4)", whiteSpace: "nowrap" }}>
+                      Open Worker Hub →
+                    </button>
+                  </div>
+                </div>
               </>
             )}
 

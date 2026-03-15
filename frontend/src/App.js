@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import FinancialSetup from "./pages/FinancialSetup";
 import InvestmentPlan from "./pages/InvestmentPlan";
 import Profile from "./pages/Profile";
+import WorkerHub from "./pages/WorkerHub";
+import OnboardingModal from "./components/OnboardingModal";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -108,6 +110,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <OnboardingModal />
         <Routes>
           <Route path="/login"           element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Login          /></PageBoundary></PublicRoute>}    />
           <Route path="/register"        element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Register       /></PageBoundary></PublicRoute>}    />
@@ -115,6 +118,7 @@ function App() {
           <Route path="/financial-setup" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><FinancialSetup /></PageBoundary></ProtectedRoute>} />
           <Route path="/investment-plan" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><InvestmentPlan /></PageBoundary></ProtectedRoute>} />
           <Route path="/profile"         element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Profile        /></PageBoundary></ProtectedRoute>} />
+          <Route path="/worker"          element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><WorkerHub      /></PageBoundary></ProtectedRoute>} />
           <Route path="/"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
           <Route path="*"  element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />} />
         </Routes>
