@@ -18,7 +18,4 @@ EXPOSE 8001
 
 ENV PORT=8001
 
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
-CMD ["/start.sh"]
+CMD ["python", "app/main.py"]

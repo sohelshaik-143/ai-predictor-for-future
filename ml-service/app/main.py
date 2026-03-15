@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException, Header
 from pydantic import BaseModel
 from typing import List, Optional
@@ -63,3 +64,9 @@ def predict_risk(req: PredictRiskRequest, x_api_key: Optional[str] = Header(None
         cls = "high"
     reasons = [f"variability:{variability:.2f}", f"savings_rate:{req.savings_rate}"]
     return PredictRiskResponse(risk_score=score, risk_class=cls, reasons=reasons)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8001))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port)
