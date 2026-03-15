@@ -23,7 +23,7 @@ const Login = () => {
     setLoading(true); setError("");
     try {
       const res = await loginUser(email, password);
-      if (!res?.token) {
+      if (!res?.accessToken) {
         setError(res?.message || res?.error || "Invalid credentials. Please check your email and password.");
         return;
       }

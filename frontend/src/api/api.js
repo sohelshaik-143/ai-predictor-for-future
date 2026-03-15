@@ -96,8 +96,8 @@ export const registerUser = (name, email, password) =>
 export const loginUser = async (email, password) => {
   const data = await api.post("/auth/login", { email, password });
 
-  if (data.token) {
-    setToken(data.token);
+  if (data.accessToken) {
+    setToken(data.accessToken);
 
     // Notify app that login happened
     window.dispatchEvent(new Event("auth-login"));
