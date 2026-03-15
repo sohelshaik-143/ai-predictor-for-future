@@ -18,4 +18,4 @@ EXPOSE 8001
 
 ENV PORT=8001
 
-CMD ["python", "app/main.py"]
+CMD ["sh", "-c", "python app/main.py"]
