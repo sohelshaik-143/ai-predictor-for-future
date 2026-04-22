@@ -103,6 +103,12 @@ export default function Login() {
 
             <button 
               type="button"
+              onClick={() => {
+                 setLoading(true);
+                 setTimeout(() => {
+                   navigate('/dashboard');
+                 }, 1500);
+              }}
               className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors py-4 rounded-xl text-sm font-semibold"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
