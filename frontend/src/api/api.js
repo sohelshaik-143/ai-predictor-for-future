@@ -154,4 +154,65 @@ export const getPrediction = async () => {
 export const getFinancialSuggestions = () =>
   api.get("/ai/suggestions");
 
+/* =========================
+   AURA AI SIMULATION LOGIC
+   (Simulating frontend predictions for the God-Level UI)
+========================= */
+
+const simulateDelay = (ms = 1500) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const predictCareerMatch = async (profile) => {
+  await simulateDelay(800);
+  return [
+    { name: 'Software Engineer', value: 92, color: '#6366f1' },
+    { name: 'Solutions Architect', value: 85, color: '#06b6d4' },
+    { name: 'Product Manager', value: 65, color: '#8b5cf6' },
+    { name: 'Data Scientist', value: 40, color: '#10b981' },
+  ];
+};
+
+export const predictSalaryGrowth = async (currentSalary = 80000) => {
+  await simulateDelay(1000);
+  const currentYear = new Date().getFullYear();
+  return [
+    { year: String(currentYear), actual: currentSalary, projected: currentSalary },
+    { year: String(currentYear + 1), actual: null, projected: Math.round(currentSalary * 1.15) },
+    { year: String(currentYear + 2), actual: null, projected: Math.round(currentSalary * 1.40) },
+    { year: String(currentYear + 3), actual: null, projected: Math.round(currentSalary * 1.70) },
+    { year: String(currentYear + 4), actual: null, projected: Math.round(currentSalary * 2.20) },
+  ];
+};
+
+export const detectSkillGap = async (role) => {
+  await simulateDelay(1200);
+  return [
+    { subject: 'System Design', A: 120, B: 140, fullMark: 150 },
+    { subject: 'React / Frontend', A: 135, B: 110, fullMark: 150 },
+    { subject: 'Cloud (AWS/GCP)', A: 86, B: 130, fullMark: 150 },
+    { subject: 'Algorithms', A: 99, B: 125, fullMark: 150 },
+    { subject: 'Leadership', A: 85, B: 90, fullMark: 150 },
+    { subject: 'Communication', A: 115, B: 95, fullMark: 150 },
+  ];
+};
+
+export const generateRoadmap = async () => {
+  await simulateDelay(900);
+  return [
+    { title: "Master System Design basics", status: "completed" },
+    { title: "Build scalable microservice", status: "in-progress" },
+    { title: "Advanced AWS Certification", status: "pending" },
+    { title: "Mock Interview Series", status: "pending" },
+    { title: "Open Source Contribution", status: "pending" },
+  ];
+};
+
+export const scoreReadiness = async () => {
+  await simulateDelay(500);
+  return {
+    score: 78,
+    status: "Action Required",
+    color: "text-orange-500",
+  };
+};
+
 export default api;

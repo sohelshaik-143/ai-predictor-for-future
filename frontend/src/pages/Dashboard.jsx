@@ -10,48 +10,65 @@ import { GlassCard } from '../components/ui/GlassCard';
 import { LayoutDashboard, Compass, Briefcase, Zap, FileText, Settings, LogOut, Bell, Search, TrendingUp, CheckCircle, BrainCircuit } from 'lucide-react';
 import { logoutUser } from '../api/api';
 
-const SIDEBAR_ITEMS = [
-  { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { id: 'predictions', icon: Compass, label: 'Predictions' },
-  { id: 'skills', icon: Zap, label: 'Skill Gap' },
-  { id: 'salary', icon: TrendingUp, label: 'Salary Forecast' },
-  { id: 'interview', icon: Briefcase, label: 'Interview Prep' },
-  { id: 'roadmap', icon: FileText, label: 'Roadmap' },
-];
-
-const SALARY_DATA = [
-  { year: '2024', actual: 80000, projected: 80000 },
-  { year: '2025', actual: null, projected: 95000 },
-  { year: '2026', actual: null, projected: 115000 },
-  { year: '2027', actual: null, projected: 140000 },
-  { year: '2028', actual: null, projected: 180000 },
-];
-
-const SKILL_DATA = [
-  { subject: 'System Design', A: 120, B: 110, fullMark: 150 },
-  { subject: 'React', A: 98, B: 130, fullMark: 150 },
-  { subject: 'Cloud (AWS)', A: 86, B: 130, fullMark: 150 },
-  { subject: 'DSA', A: 99, B: 100, fullMark: 150 },
-  { subject: 'Leadership', A: 85, B: 90, fullMark: 150 },
-  { subject: 'Communication', A: 65, B: 85, fullMark: 150 },
-];
-
-const CAREER_MATCH_DATA = [
-  { name: 'Software Engineer', value: 92, color: '#6366f1' },
-  { name: 'Product Manager', value: 65, color: '#8b5cf6' },
-  { name: 'Data Scientist', value: 40, color: '#10b981' },
-];
-
-const ROADMAP_ITEMS = [
-  { title: "Master System Design basics", status: "completed" },
-  { title: "Build scalable microservice", status: "in-progress" },
-  { title: "Advanced AWS Certification", status: "pending" },
-  { title: "Mock Interview Series", status: "pending" },
-];
+import { 
+  predictCareerMatch, 
+  predictSalaryGrowth, 
+  detectSkillGap, 
+  generateRoadmap, 
+  scoreReadiness 
+} from '../api/api';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
+  
+  // Dynamic State for AI Data
+  const [loading, setLoading] = useState(true);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [salaryData, setSalaryData] = useState([]);
+  const [skillData, setSkillData] = useState([]);
+  const [careerMatch, setCareerMatch] = useState([]);
+  const [roadmap, setRoadmap] = useState([]);
+  const [readiness, setReadiness] = useState({ score: 0, status: '', color: '' });
+
+  const loadAIData = async () => {
+    try {
+      const [salaryRes, skillRes, matchRes, roadmapRes, readyRes] = await Promise.all([
+        predictSalaryGrowth(80000),
+        detectSkillGap('Senior Software Engineer'),
+        predictCareerMatch(),
+        generateRoadmap(),
+        scoreReadiness()
+      ]);
+      setSalaryData(salaryRes);
+      setSkillData(skillRes);
+      setCareerMatch(matchRes);
+      setRoadmap(roadmapRes);
+      setReadiness(readyRes);
+    } catch (err) {
+      console.error("AI Error:", err);
+    } finally {
+      setLoading(false);
+      setIsRegenerating(false);
+    }
+  };
+
+  React.useEffect(() => {
+    loadAIData();
+  }, []);
+
+  const handleRegenerate = () => {
+    setIsRegenerating(true);
+    // Add some random perturbations to simulate dynamic generation
+    setSalaryData(prev => prev.map((s, i) => i === 0 ? s : { ...s, projected: s.projected + (Math.random() > 0.5 ? 2000 : -2000) }));
+    setSkillData(prev => prev.map(s => ({ ...s, A: Math.min(150, s.A + (Math.random() * 20 - 5)) })));
+    setCareerMatch(prev => {
+      const updated = prev.map(m => ({ ...m, value: Math.min(100, Math.max(0, m.value + Math.round(Math.random() * 10 - 5))) }));
+      updated.sort((a,b) => b.value - a.value);
+      return updated;
+    });
+    setTimeout(() => setIsRegenerating(false), 2000);
+  };
 
   const handleLogout = () => {
     logoutUser();
@@ -73,7 +90,14 @@ export default function Dashboard() {
         </div>
 
         <div className="flex-1 py-6 px-4 space-y-1 overflow-y-auto">
-          {SIDEBAR_ITEMS.map((item) => {
+          {[
+            { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+            { id: 'predictions', icon: Compass, label: 'Predictions' },
+            { id: 'skills', icon: Zap, label: 'Skill Gap' },
+            { id: 'salary', icon: TrendingUp, label: 'Salary Forecast' },
+            { id: 'interview', icon: Briefcase, label: 'Interview Prep' },
+            { id: 'roadmap', icon: FileText, label: 'Roadmap' },
+          ].map((item) => {
             const isActive = activeTab === item.id;
             return (
               <button
@@ -148,19 +172,30 @@ export default function Dashboard() {
                 <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back, Alex.</h1>
                 <p className="text-white/50 text-sm">Your intelligent career trajectory is on track. Here's your latest forecast.</p>
               </div>
-              <button className="bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                <Zap className="w-4 h-4 text-accent" /> Regenerate Prediction
+              <button 
+                onClick={handleRegenerate} 
+                disabled={isRegenerating}
+                className={`bg-white/5 border border-white/10 hover:bg-white/10 px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${isRegenerating ? 'opacity-50 blur-[1px]' : ''}`}
+              >
+                <Zap className={`w-4 h-4 text-accent ${isRegenerating ? 'animate-pulse' : ''}`} /> 
+                {isRegenerating ? 'Regenerating AI Data...' : 'Regenerate Prediction'}
               </button>
             </div>
 
-            {/* Top Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[
-                { title: 'Career Match Score', value: '92%', badge: '+5% this month', color: 'text-primary' },
-                { title: 'Salary Trajectory', value: '$180k', badge: 'By 2028', color: 'text-accent' },
-                { title: 'Market Demand', value: 'High', badge: 'Top 10%', color: 'text-secondary' },
-                { title: 'Readiness Score', value: '78/100', badge: 'Action Required', color: 'text-orange-500' },
-              ].map((stat, idx) => (
+            {loading ? (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-50 rounded-2xl">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : (
+             <>
+              {/* Top Stats Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                {[
+                  { title: 'Career Match Score', value: `${careerMatch[0]?.value || 0}%`, badge: 'Top Match', color: 'text-primary' },
+                  { title: 'Salary Trajectory', value: `$${Math.round((salaryData[salaryData.length-1]?.projected || 0) / 1000)}k`, badge: `By ${salaryData[salaryData.length-1]?.year}`, color: 'text-accent' },
+                  { title: 'Market Demand', value: 'High', badge: 'Top 10%', color: 'text-secondary' },
+                  { title: 'Readiness Score', value: `${readiness.score}/100`, badge: readiness.status, color: readiness.color },
+                ].map((stat, idx) => (
                 <GlassCard key={idx} className="p-5">
                   <div className="text-white/50 text-sm font-medium mb-2">{stat.title}</div>
                   <div className={`text-3xl font-bold mb-3 ${stat.color}`}>{stat.value}</div>
@@ -182,7 +217,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 min-h-[300px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={SALARY_DATA} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                    <AreaChart data={salaryData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="colorProjected" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.3}/>
@@ -211,7 +246,7 @@ export default function Dashboard() {
                 </div>
                 <div className="flex-1 min-h-[300px] flex items-center justify-center">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={SKILL_DATA}>
+                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={skillData}>
                       <PolarGrid stroke="rgba(255,255,255,0.1)" />
                       <PolarAngleAxis dataKey="subject" tick={{fill: 'rgba(255,255,255,0.6)', fontSize: 10}} />
                       <Radar name="Current Skills" dataKey="A" stroke="#6366f1" fill="#6366f1" fillOpacity={0.5} />
@@ -231,10 +266,10 @@ export default function Dashboard() {
               <GlassCard className="p-6">
                 <div className="flex justify-between items-center mb-6">
                   <h3 className="text-lg font-bold">AI Priority Roadmap</h3>
-                  <span className="text-xs text-accent">25% Completed</span>
+                  <span className="text-xs text-accent">{Math.round((roadmap.filter(r => r.status === 'completed').length / roadmap.length) * 100 || 0)}% Completed</span>
                 </div>
                 <div className="space-y-4">
-                  {ROADMAP_ITEMS.map((item, idx) => (
+                  {roadmap.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/10 transition-colors">
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
                         item.status === 'completed' ? 'bg-primary/20 text-primary' : 
@@ -255,7 +290,7 @@ export default function Dashboard() {
               <GlassCard className="p-6">
                 <h3 className="text-lg font-bold mb-6">Optimal Role Match Probabilities</h3>
                 <div className="space-y-6">
-                  {CAREER_MATCH_DATA.map((role, idx) => (
+                  {careerMatch.map((role, idx) => (
                     <div key={idx} className="relative">
                       <div className="flex justify-between text-sm font-medium mb-2">
                         <span>{role.name}</span>
@@ -284,7 +319,8 @@ export default function Dashboard() {
               </GlassCard>
 
             </div>
-
+            </>
+            )}
           </motion.div>
         </main>
       </div>
