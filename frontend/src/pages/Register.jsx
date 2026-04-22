@@ -121,7 +121,11 @@ export default function Register() {
               onClick={() => {
                  setLoading(true);
                  setTimeout(() => {
-                   navigate('/dashboard');
+                   import('../api/api').then(({ setToken }) => {
+                     setToken('premium-mock-token');
+                     window.dispatchEvent(new Event('auth-login'));
+                     navigate('/dashboard');
+                   });
                  }, 1500);
               }}
               className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors py-4 rounded-xl text-sm font-semibold"
