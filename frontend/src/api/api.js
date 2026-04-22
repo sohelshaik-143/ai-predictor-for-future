@@ -159,60 +159,97 @@ export const getFinancialSuggestions = () =>
    (Simulating frontend predictions for the God-Level UI)
 ========================= */
 
-const simulateDelay = (ms = 1500) => new Promise(resolve => setTimeout(resolve, ms));
+// Fake Network Request Delay
+const simulateDelay = (ms = 1000) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const getAssessmentData = () => {
+   try {
+     return JSON.parse(localStorage.getItem('user_assessment')) || null;
+   } catch {
+     return null;
+   }
+};
 
 export const predictCareerMatch = async (profile) => {
-  await simulateDelay(800);
+  await simulateDelay(600);
+  const data = getAssessmentData();
+  if (!data) return [{ name: "General Tech", value: 50, color: "#6366f1" }];
+
+  const isBigLeap = (data.currentRole.toLowerCase().includes('junior') && data.targetRole.toLowerCase().includes('senior'));
+  
   return [
-    { name: 'Software Engineer', value: 92, color: '#6366f1' },
-    { name: 'Solutions Architect', value: 85, color: '#06b6d4' },
-    { name: 'Product Manager', value: 65, color: '#8b5cf6' },
-    { name: 'Data Scientist', value: 40, color: '#10b981' },
+    { name: data.targetRole || "Software Engineer", value: isBigLeap ? 65 : 88, color: "#6366f1" },
+    { name: "Engineering Manager", value: 45, color: "#8b5cf6" },
+    { name: "Product Manager", value: 30, color: "#10b981" }
   ];
 };
 
 export const predictSalaryGrowth = async (currentSalary = 80000) => {
-  await simulateDelay(1000);
+  await simulateDelay(700);
+  const data = getAssessmentData();
+  
+  const baseCurve = currentSalary || (data ? (data.experienceYears * 10000 + 60000) : 80000);
+  const growthRate = data ? (data.goal === 'salary_growth' ? 1.15 : 1.08) : 1.10;
+  
   const currentYear = new Date().getFullYear();
-  return [
-    { year: String(currentYear), actual: currentSalary, projected: currentSalary },
-    { year: String(currentYear + 1), actual: null, projected: Math.round(currentSalary * 1.15) },
-    { year: String(currentYear + 2), actual: null, projected: Math.round(currentSalary * 1.40) },
-    { year: String(currentYear + 3), actual: null, projected: Math.round(currentSalary * 1.70) },
-    { year: String(currentYear + 4), actual: null, projected: Math.round(currentSalary * 2.20) },
-  ];
+  const years = [currentYear, currentYear+1, currentYear+2, currentYear+3, currentYear+4];
+  return years.map((year, idx) => ({
+    year: year.toString(),
+    projected: Math.round(baseCurve * Math.pow(growthRate, idx))
+  }));
 };
 
 export const detectSkillGap = async (role) => {
-  await simulateDelay(1200);
-  return [
-    { subject: 'System Design', A: 120, B: 140, fullMark: 150 },
-    { subject: 'React / Frontend', A: 135, B: 110, fullMark: 150 },
-    { subject: 'Cloud (AWS/GCP)', A: 86, B: 130, fullMark: 150 },
-    { subject: 'Algorithms', A: 99, B: 125, fullMark: 150 },
-    { subject: 'Leadership', A: 85, B: 90, fullMark: 150 },
-    { subject: 'Communication', A: 115, B: 95, fullMark: 150 },
-  ];
+  await simulateDelay(500);
+  const data = getAssessmentData();
+  
+  if (!data || !data.skillsArray) {
+    return [
+      { subject: 'System Design', A: 40, B: 110, fullMark: 150 },
+      { subject: 'React/Frontend', A: 90, B: 130, fullMark: 150 }
+    ];
+  }
+
+  const skills = data.skillsArray.slice(0, 5);
+  while(skills.length < 5) skills.push("Core Tech");
+
+  return skills.map((skill, idx) => {
+     const userLevel = 60 + (data.experienceYears * 5) + (Math.random() * 20);
+     return {
+       subject: skill,
+       A: Math.round(userLevel),
+       B: Math.round(120 + Math.random() * 30),
+       fullMark: 150
+     }
+  });
 };
 
 export const generateRoadmap = async () => {
-  await simulateDelay(900);
+  await simulateDelay(800);
+  const data = getAssessmentData();
+  const target = data ? data.targetRole : "Your Next Role";
+
   return [
-    { title: "Master System Design basics", status: "completed" },
-    { title: "Build scalable microservice", status: "in-progress" },
-    { title: "Advanced AWS Certification", status: "pending" },
-    { title: "Mock Interview Series", status: "pending" },
-    { title: "Open Source Contribution", status: "pending" },
+    { title: `Master System Design for ${target}`, status: 'completed' },
+    { title: `Advanced Analytics in ${data ? data.topSkills.split(',')[0] || 'Tech' : 'Tech'}`, status: 'in-progress' },
+    { title: 'Update Resume with Aura Metrics', status: 'pending' },
+    { title: 'Virtual Mock Interview #3', status: 'pending' }
   ];
 };
 
 export const scoreReadiness = async () => {
-  await simulateDelay(500);
-  return {
-    score: 78,
-    status: "Action Required",
-    color: "text-orange-500",
-  };
+  await simulateDelay(400);
+  const data = getAssessmentData();
+  const expBoost = data ? Math.min(30, data.experienceYears * 5) : 0;
+  const score = 55 + expBoost + Math.round(Math.random() * 10);
+  
+  let status = 'Action Required';
+  let color = 'text-orange-500';
+
+  if (score >= 85) { status = 'Excellent'; color = 'text-green-500'; }
+  else if (score >= 70) { status = 'Good'; color = 'text-primary'; }
+
+  return { score, status, color };
 };
 
 export default api;

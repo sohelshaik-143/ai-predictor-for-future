@@ -1,8 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState, Component } from "react";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Assessment from "./pages/Assessment";
 import FinancialSetup from "./pages/FinancialSetup";
 import InvestmentPlan from "./pages/InvestmentPlan";
 import Profile from "./pages/Profile";
@@ -11,6 +13,9 @@ import JobBoard from "./pages/JobBoard";
 import Home from "./pages/Home";
 import ChatPage from "./pages/ChatPage";
 import MyDashboard from "./pages/MyDashboard";
+
+// Replace with your actual Google Client ID from Google Cloud Console
+const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID_HERE.apps.googleusercontent.com";
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -111,24 +116,27 @@ function App() {
   }, []);
 
   return (
-    <ErrorBoundary>
-      <Router>
-        <Routes>
-          <Route path="/login"           element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Login          /></PageBoundary></PublicRoute>}    />
-          <Route path="/register"        element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Register       /></PageBoundary></PublicRoute>}    />
-          <Route path="/dashboard"       element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Dashboard      /></PageBoundary></ProtectedRoute>} />
-          <Route path="/financial-setup" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><FinancialSetup /></PageBoundary></ProtectedRoute>} />
-          <Route path="/investment-plan" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><InvestmentPlan /></PageBoundary></ProtectedRoute>} />
-          <Route path="/profile"         element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Profile        /></PageBoundary></ProtectedRoute>} />
-          <Route path="/worker"          element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><WorkerHub      /></PageBoundary></ProtectedRoute>} />
-          <Route path="/jobs"            element={<PageBoundary><JobBoard /></PageBoundary>} />
-          <Route path="/chat"            element={<PageBoundary><ChatPage /></PageBoundary>} />
-          <Route path="/my-dashboard"    element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><MyDashboard /></PageBoundary></ProtectedRoute>} />
-          <Route path="/"  element={<PageBoundary><Home auth={isAuthenticated} /></PageBoundary>} />
-          <Route path="*"  element={<Navigate to="/" replace />} />
-        </Routes>
-      </Router>
-    </ErrorBoundary>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <ErrorBoundary>
+        <Router>
+          <Routes>
+            <Route path="/login"           element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Login          /></PageBoundary></PublicRoute>}    />
+            <Route path="/register"        element={<PublicRoute    auth={isAuthenticated}><PageBoundary><Register       /></PageBoundary></PublicRoute>}    />
+            <Route path="/assessment"      element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Assessment     /></PageBoundary></ProtectedRoute>} />
+            <Route path="/dashboard"       element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Dashboard      /></PageBoundary></ProtectedRoute>} />
+            <Route path="/financial-setup" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><FinancialSetup /></PageBoundary></ProtectedRoute>} />
+            <Route path="/investment-plan" element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><InvestmentPlan /></PageBoundary></ProtectedRoute>} />
+            <Route path="/profile"         element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><Profile        /></PageBoundary></ProtectedRoute>} />
+            <Route path="/worker"          element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><WorkerHub      /></PageBoundary></ProtectedRoute>} />
+            <Route path="/jobs"            element={<PageBoundary><JobBoard /></PageBoundary>} />
+            <Route path="/chat"            element={<PageBoundary><ChatPage /></PageBoundary>} />
+            <Route path="/my-dashboard"    element={<ProtectedRoute auth={isAuthenticated}><PageBoundary><MyDashboard /></PageBoundary></ProtectedRoute>} />
+            <Route path="/"  element={<PageBoundary><Home auth={isAuthenticated} /></PageBoundary>} />
+            <Route path="*"  element={<Navigate to="/" replace />} />
+          </Routes>
+        </Router>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
   );
 }
 

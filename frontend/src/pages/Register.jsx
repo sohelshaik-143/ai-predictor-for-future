@@ -1,25 +1,61 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+import { registerUser, setToken } from '../api/api';
 import { MagneticButton } from '../components/ui/MagneticButton';
-import { registerUser } from '../api/api';
 import { BrainCircuit, Loader2 } from 'lucide-react';
 
 export default function Register() {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setLoading(true);
+    setToken('premium-google-token');
+    
+    try {
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+      });
+      const userInfo = await res.json();
+      localStorage.setItem('user_name', userInfo.name || 'Aura Professional');
+    } catch(err) {
+      localStorage.setItem('user_name', 'Aura Professional');
+    }
+
+    // Check if user has taken assessment
+    const hasData = localStorage.getItem('user_assessment');
+    window.dispatchEvent(new Event('auth-login'));
+    
+    setTimeout(() => {
+       if(hasData) navigate('/dashboard');
+       else navigate('/assessment');
+    }, 1000);
+  };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google Sign-In Failed')
+  });
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
-      await registerUser(formData.name, formData.email, formData.password);
-      navigate('/dashboard');
+      await registerUser(formData);
+      window.dispatchEvent(new Event('auth-login'));
+      const hasData = localStorage.getItem('user_assessment');
+      if (hasData) navigate('/dashboard');
+      else navigate('/assessment');
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.');
+      setError("Registration failed. Try again.");
       setLoading(false);
     }
   };
@@ -118,16 +154,7 @@ export default function Register() {
 
             <button 
               type="button"
-              onClick={() => {
-                 setLoading(true);
-                 setTimeout(() => {
-                   import('../api/api').then(({ setToken }) => {
-                     setToken('premium-mock-token');
-                     window.dispatchEvent(new Event('auth-login'));
-                     navigate('/dashboard');
-                   });
-                 }, 1500);
-              }}
+              onClick={() => loginWithGoogle()}
               className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors py-4 rounded-xl text-sm font-semibold"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">

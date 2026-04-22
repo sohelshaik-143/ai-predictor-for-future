@@ -22,6 +22,11 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('dashboard');
   
+  // Get contextual data
+  const assessmentData = JSON.parse(localStorage.getItem('user_assessment') || "{}");
+  const userName = localStorage.getItem('user_name') || 'Aura Professional';
+  const roleName = assessmentData.currentRole || 'Premium Tier';
+  
   // Dynamic State for AI Data
   const [loading, setLoading] = useState(true);
   const [isRegenerating, setIsRegenerating] = useState(false);
@@ -146,12 +151,12 @@ export default function Dashboard() {
             </button>
             <div className="flex items-center gap-3 pl-6 border-l border-white/10">
               <div className="text-right hidden md:block">
-                <div className="text-sm font-bold">Alex Walker</div>
-                <div className="text-xs text-white/40">Premium Tier</div>
+                <div className="text-sm font-bold">{userName}</div>
+                <div className="text-xs text-white/40">{roleName}</div>
               </div>
               <div className="w-10 h-10 rounded-full bg-gradient-to-r from-accent to-secondary p-[2px]">
                 <div className="w-full h-full rounded-full bg-[#09090b] flex items-center justify-center font-bold text-xs">
-                  AW
+                  {userName.substring(0,2).toUpperCase()}
                 </div>
               </div>
             </div>
@@ -169,8 +174,8 @@ export default function Dashboard() {
             {/* Header Area */}
             <div className="flex justify-between items-end mb-8">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back, Alex.</h1>
-                <p className="text-white/50 text-sm">Your intelligent career trajectory is on track. Here's your latest forecast.</p>
+                <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome Back, {userName.split(' ')[0]}.</h1>
+                <p className="text-white/50 text-sm">Your intelligent {assessmentData.targetRole || 'career'} trajectory is on track. Here's your latest forecast.</p>
               </div>
               <button 
                 onClick={handleRegenerate} 
@@ -338,19 +343,50 @@ export default function Dashboard() {
             )}
 
             {activeTab === 'skills' && (
-              <GlassCard className="p-8 pb-20 h-screen flex flex-col items-center">
+              <GlassCard className="p-8 pb-20 h-auto flex flex-col items-center">
                 <h3 className="text-2xl font-bold mb-2">Detailed Skill Gap Detector</h3>
                 <p className="text-white/50 mb-8">Comprehensive radar mapping against 10M+ tech resumes.</p>
-                <div className="flex-1 w-full max-w-4xl min-h-[500px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={skillData}>
-                      <PolarGrid stroke="rgba(255,255,255,0.1)" />
-                      <PolarAngleAxis dataKey="subject" tick={{fill: 'rgba(255,255,255,0.6)', fontSize: 14}} />
-                      <Radar name="Current Skills" dataKey="A" stroke="#6366f1" strokeWidth={3} fill="#6366f1" fillOpacity={0.4} />
-                      <Radar name="Required Target" dataKey="B" stroke="#10b981" strokeWidth={3} fill="#10b981" fillOpacity={0.2} strokeDasharray="5 5" />
-                      <RechartsTooltip wrapperStyle={{ outline: 'none' }} contentStyle={{ backgroundColor: 'black', border: '1px solid #333', borderRadius: '8px' }} />
-                    </RadarChart>
-                  </ResponsiveContainer>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl mt-4">
+                  {/* Radar Chart */}
+                  <div className="flex flex-col items-center bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <h4 className="text-lg font-bold mb-4">Competency Map</h4>
+                    <div className="w-full h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={skillData}>
+                          <PolarGrid stroke="rgba(255,255,255,0.1)" />
+                          <PolarAngleAxis dataKey="subject" tick={{fill: 'rgba(255,255,255,0.6)', fontSize: 13}} />
+                          <Radar name="Current Mastery" dataKey="A" stroke="#6366f1" strokeWidth={3} fill="#6366f1" fillOpacity={0.4} />
+                          <Radar name="Target Requirement" dataKey="B" stroke="#10b981" strokeWidth={3} fill="#10b981" fillOpacity={0.2} strokeDasharray="5 5" />
+                          <RechartsTooltip wrapperStyle={{ outline: 'none' }} contentStyle={{ backgroundColor: 'black', border: '1px solid #333', borderRadius: '8px' }} />
+                        </RadarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Dynamic Pie Chart */}
+                  <div className="flex flex-col items-center bg-white/5 border border-white/5 rounded-3xl p-6">
+                    <h4 className="text-lg font-bold mb-4">Skill Weight Distribution</h4>
+                    <div className="w-full h-[400px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie 
+                            data={skillData} 
+                            dataKey="A" 
+                            nameKey="subject" 
+                            cx="50%" cy="50%" 
+                            innerRadius={80} 
+                            outerRadius={120} 
+                            paddingAngle={5}
+                          >
+                            {skillData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'][index % 5]} />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip wrapperStyle={{ outline: 'none' }} contentStyle={{ backgroundColor: 'rgba(0,0,0,0.8)', border: '1px solid #333', borderRadius: '8px' }} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
                 </div>
               </GlassCard>
             )}

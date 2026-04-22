@@ -1,26 +1,59 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
+import { loginUser, setToken } from '../api/api';
 import { MagneticButton } from '../components/ui/MagneticButton';
-import { loginUser } from '../api/api';
 import { BrainCircuit, Loader2 } from 'lucide-react';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    setLoading(true);
+    setToken('premium-google-token');
+    
+    try {
+      // Fetch Real Google User Data
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${tokenResponse.access_token}` }
+      });
+      const userInfo = await res.json();
+      localStorage.setItem('user_name', userInfo.name || 'Aura Professional');
+    } catch(err) {
+      localStorage.setItem('user_name', 'Aura Professional');
+    }
+
+    // Check if user has taken assessment
+    const hasData = localStorage.getItem('user_assessment');
+    window.dispatchEvent(new Event('auth-login'));
+    
+    setTimeout(() => {
+       if(hasData) navigate('/dashboard');
+       else navigate('/assessment');
+    }, 1000);
+  };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google Sign-In Failed')
+  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
     try {
       await loginUser(email, password);
-      navigate('/dashboard');
+      window.dispatchEvent(new Event('auth-login'));
+      const hasData = localStorage.getItem('user_assessment');
+      if (hasData) navigate('/dashboard');
+      else navigate('/assessment');
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError("Invalid Email or Password");
       setLoading(false);
     }
   };
@@ -101,18 +134,10 @@ export default function Login() {
               <div className="flex-grow border-t border-white/10"></div>
             </div>
 
+            {/* Real Google Auth */}
             <button 
               type="button"
-              onClick={() => {
-                 setLoading(true);
-                 setTimeout(() => {
-                   import('../api/api').then(({ setToken }) => {
-                     setToken('premium-mock-token');
-                     window.dispatchEvent(new Event('auth-login'));
-                     navigate('/dashboard');
-                   });
-                 }, 1500);
-              }}
+              onClick={() => loginWithGoogle()}
               className="w-full flex items-center justify-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors py-4 rounded-xl text-sm font-semibold"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
